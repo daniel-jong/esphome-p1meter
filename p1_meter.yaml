@@ -1,0 +1,91 @@
+esphome:
+  name: p1meter
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_key
+
+ota:
+  password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+# Enable Web server.
+web_server:
+  port: 80
+
+# Set up a custom UART for a 115200 8n1 Inverted serial setup
+# Here the inversion is handled by the Esp32 and not by extra electrical components.
+uart:
+  id: uart_inv
+  baud_rate: 115200
+  data_bits: 8
+  parity: NONE
+  stop_bits: 1
+  tx_pin:
+    number: GPIO0
+    inverted: true
+  rx_pin:
+    number: GPIO4
+    inverted: true
+
+dsmr:
+  uart_id: uart_inv
+  request_interval: 60s
+
+# Sensors:
+# To find all possible sensors reffer to https://esphome.io/components/sensor/dsmr.html
+sensor:
+  - platform: dsmr
+    energy_delivered_tariff1:
+      name: "p1_consumption_low_tariff"
+    energy_delivered_tariff2:
+      name: "p1_consumption_high_tariff"
+    energy_returned_tariff1:
+      name: "p1_return_delivery_low_tariff"
+    energy_returned_tariff2:
+      name: "p1_return_delivery_high_tariff"
+    power_delivered: 
+      name: "p1_actual_power_consumption"
+    power_returned: 
+      name: "p1_actual_return_delivery"
+    gas_delivered: 
+      name: "p1_gas_usage"
+    # These next sensors intentionally do not get exposed to Home Assistant, as I do not record them in my setup
+    # To enable them switch the Id field to name
+    power_delivered_l1: 
+      id: "p1_power_delivered_l1"
+    power_delivered_l2: 
+      id: "p1_power_delivered_l2"
+    power_delivered_l3: 
+      id: "p1_power_delivered_l3"
+    power_returned_l1: 
+      id: "p1_power_returned_l1"
+    power_returned_l2: 
+      id: "p1_power_returned_l2"
+    power_returned_l3: 
+      id: "p1_power_returned_l3"
+
+text_sensor:
+  - platform: dsmr
+    electricity_tariff:
+      name: "p1_electricity_tariff"
+    identification: 
+      id: "p1_identification"
+    water_equipment_id: 
+      id: "p1_water_equipment_id"
+    gas_equipment_id: 
+      id: "p1_gas_equipment_id"
+    thermal_equipment_id: 
+      id: "p1_thermal_equipment_id"
